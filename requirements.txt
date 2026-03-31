@@ -1,0 +1,17 @@
+# Django Framework
+Django==4.2.7
+
+# PostgreSQL adapter
+psycopg2-binary==2.9.9
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# Django REST Framework (untuk API di modul berikutnya)
+djangorestframework==3.14.0
+
+# Whitenoise untuk serve static files
+whitenoise==6.6.0
+
+# Gunicorn (WSGI server untuk production)
+gunicorn==21.2.0
