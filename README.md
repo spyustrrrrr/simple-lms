@@ -2,6 +2,16 @@
 
 > Project Django dengan Docker untuk mata kuliah Pemrograman Web Lanjut
 
+## 📋 Daftar Isi
+
+- [Project Structure](#-project-structure)
+- [Setup & Installation](#-cara-menjalankan-project)
+- [Tugas 1: Docker & Django Setup](#-tugas-1-docker--django-setup)
+- [Tugas 2: Data Models & ORM Optimization](#-tugas-2-data-models--orm-optimization)
+- [Tech Stack](#-tech-stack)
+- [Author](#-author)
+
+--
 ---
 
 ## 🗂️ Project Structure
@@ -15,10 +25,16 @@ simple-lms/
 ├── requirements.txt
 ├── manage.py
 ├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
+│ ├── init.py
+│ ├── settings.py
+│ ├── urls.py
+│ └── wsgi.py
+├── courses/ # Aplikasi utama LMS
+│ ├── init.py
+│ ├── models.py
+│ ├── admin.py
+│ ├── query_demo.py
+│ └── migrations/
 └── README.md
 ```
 
@@ -201,6 +217,77 @@ docker compose down -v
 * Set `DEBUG=False` saat production
 
 ---
+
+📝 Tugas 2: Data Models & ORM Optimization
+✅ Data Models (6 tabel sesuai requirement)
+Model	Deskripsi	Relasi
+User	Custom user dengan role (admin/instructor/student)	-
+Category	Self-referencing untuk hierarchy kategori	parent → Category
+Course	Course dengan instructor dan category	instructor → User, category → Category
+Lesson	Lesson dalam course dengan ordering	course → Course
+Enrollment	Pendaftaran student ke course	student → User, course → Course
+Progress	Tracking completion lesson per enrollment	enrollment → Enrollment, lesson → Lesson
+⚡ Query Optimization
+
+Custom Managers yang dibuat:
+python
+
+# Course.objects.for_listing()
+Course.objects.select_related('instructor', 'category')
+               .prefetch_related('lessons')
+
+# Enrollment.objects.for_student_dashboard()
+Enrollment.objects.select_related('student', 'course')
+                  .prefetch_related('progress_set__lesson')
+
+📊 Demo Query Optimization (N+1 Problem)
+
+Hasil perbandingan:
+text
+
+=== NAIVE QUERY ===
+instruktur1
+Total Query: 3
+
+=== OPTIMIZED QUERY ===
+instruktur1
+Total Query: 2
+
+Query Type	Total Query	Keterangan
+Naive Query	3 queries	Mengalami N+1 problem
+Optimized Query	2 queries	Menggunakan select_related
+
+Kesimpulan: Dengan menggunakan select_related, query dapat dioptimasi dari 3 menjadi 2 query, menghindari N+1 problem.
+🎛️ Django Admin Configuration
+Fitur	Implementasi
+List display	✅ Username, email, role, title, instructor
+Search fields	✅ Search by title, username, email
+List filter	✅ Filter by role, category, status
+Inline models	✅ LessonInline di dalam Course
+
+## 📸 Screenshot
+### Dashboard Admin	
+![Dashboard Admin](screenshots/dashboard.png)
+### Inline Lesson di Course	
+![Inline Lesson di Course](screenshots/inline.png)
+### Query Optimization Demo	
+![Query Optimization Demo](screenshots/query_demo.png)
+
+🔄 Migration & Fixtures
+
+# Buat migration
+docker compose exec web python manage.py makemigrations
+
+# Jalankan migration
+docker compose exec web python manage.py migrate
+
+# Load fixtures (opsional)
+docker compose exec web python manage.py loaddata initial_data
+
+🐳 Docker Services
+Service	Image	Port	Keterangan
+web	Python 3.11-slim	8001	Django application
+db	postgres:15-alpine	5433	PostgreSQL database
 
 ## 👨‍💻 Author
 
