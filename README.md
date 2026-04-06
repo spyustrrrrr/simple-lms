@@ -218,20 +218,24 @@ docker compose down -v
 
 ---
 
-📝 Tugas 2: Data Models & ORM Optimization
-✅ Data Models (6 tabel sesuai requirement)
-Model	Deskripsi	Relasi
-User	Custom user dengan role (admin/instructor/student)	-
-Category	Self-referencing untuk hierarchy kategori	parent → Category
-Course	Course dengan instructor dan category	instructor → User, category → Category
-Lesson	Lesson dalam course dengan ordering	course → Course
-Enrollment	Pendaftaran student ke course	student → User, course → Course
-Progress	Tracking completion lesson per enrollment	enrollment → Enrollment, lesson → Lesson
-⚡ Query Optimization
+## 📝 Tugas 2: Data Models & ORM Optimization
+
+### ✅ Data Models (6 tabel sesuai requirement)
+
+| Model      | Deskripsi                                          | Relasi                                              |
+|------------|----------------------------------------------------|-----------------------------------------------------|
+| User       | Custom user dengan role (admin/instructor/student) | -                                                   |
+| Category   | Self-referencing untuk hierarchy kategori          | parent → Category                                   |
+| Course     | Course dengan instructor dan category              | instructor → User, category → Category              |
+| Lesson     | Lesson dalam course dengan ordering                | course → Course                                     |
+| Enrollment | Pendaftaran student ke course                      | student → User, course → Course                     |
+| Progress   | Tracking completion lesson per enrollment          | enrollment → Enrollment, lesson → Lesson            |
+
+
+### ⚡ Query Optimization
 
 Custom Managers yang dibuat:
-python
-
+```python
 # Course.objects.for_listing()
 Course.objects.select_related('instructor', 'category')
                .prefetch_related('lessons')
@@ -239,6 +243,7 @@ Course.objects.select_related('instructor', 'category')
 # Enrollment.objects.for_student_dashboard()
 Enrollment.objects.select_related('student', 'course')
                   .prefetch_related('progress_set__lesson')
+```
 
 📊 Demo Query Optimization (N+1 Problem)
 
@@ -253,28 +258,35 @@ Total Query: 3
 instruktur1
 Total Query: 2
 
-Query Type	Total Query	Keterangan
-Naive Query	3 queries	Mengalami N+1 problem
-Optimized Query	2 queries	Menggunakan select_related
+| Query Type      | Total Query | Keterangan                        |
+|-----------------|-------------|-----------------------------------|
+| Naive Query     | 3 queries   | Mengalami N+1 problem             |
+| Optimized Query | 2 queries   | Menggunakan select_related        |
 
 Kesimpulan: Dengan menggunakan select_related, query dapat dioptimasi dari 3 menjadi 2 query, menghindari N+1 problem.
-🎛️ Django Admin Configuration
-Fitur	Implementasi
-List display	✅ Username, email, role, title, instructor
-Search fields	✅ Search by title, username, email
-List filter	✅ Filter by role, category, status
-Inline models	✅ LessonInline di dalam Course
 
-## 📸 Screenshot
-### Dashboard Admin	
+### 🎛️ Django Admin Configuration
+
+| Fitur         | Implementasi                                  |
+|---------------|-----------------------------------------------|
+| List display  | ✅ Username, email, role, title, instructor   |
+| Search fields | ✅ Search by title, username, email           |
+| List filter   | ✅ Filter by role, category, status           |
+| Inline models | ✅ LessonInline di dalam Course               |
+
+### 📸 Screenshot
+
+#### Dashboard Admin
 ![Dashboard Admin](screenshots/dashboard.png)
-### Inline Lesson di Course	
+
+#### Inline Lesson di Course
 ![Inline Lesson di Course](screenshots/inline.png)
-### Query Optimization Demo	
+
+#### Query Optimization Demo
 ![Query Optimization Demo](screenshots/query_demo.png)
 
-🔄 Migration & Fixtures
-
+### 🔄 Migration & Fixtures
+```bash
 # Buat migration
 docker compose exec web python manage.py makemigrations
 
@@ -283,14 +295,27 @@ docker compose exec web python manage.py migrate
 
 # Load fixtures (opsional)
 docker compose exec web python manage.py loaddata initial_data
+```
 
-🐳 Docker Services
-Service	Image	Port	Keterangan
-web	Python 3.11-slim	8001	Django application
-db	postgres:15-alpine	5433	PostgreSQL database
+### 🐳 Docker Services
+
+| Service | Image              | Port | Keterangan          |
+|---------|--------------------|------|---------------------|
+| web     | Python 3.11-slim   | 8001 | Django application  |
+| db      | postgres:15-alpine | 5433 | PostgreSQL database |
+
+---
+
+## ⚠️ Catatan Penting
+
+* File `.env` tidak boleh di-commit
+* Gunakan `postgres` sebagai user database untuk development
+* Gunakan port `8001` karena port 8000 sudah digunakan
+* Ganti `SECRET_KEY` saat production
+* Set `DEBUG=False` saat production
+
+---
 
 ## 👨‍💻 Author
 
 Nama: Sulthan Yustr Suwardhi
-
----
